@@ -8,9 +8,9 @@ using DiplomaProject.AlgorithmSteps;
 
 namespace DiplomaProject
 {
-    class Program
+    public class Program
     {
-        static void Main()
+        public static void Main()
         {
             Console.WriteLine(DateTime.Now);
             const int n = 250;

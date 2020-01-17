@@ -13,7 +13,7 @@ namespace DiplomaProject.AlgorithmSteps
             Func<double, double> sigmaDerivative,
             Func<double, double> secondSigmaDerivative)
         {
-            double eta = 1 / (sArray.Sum(x => x * x));
+            double eta = 1 / sArray.Sum(x => x * x);
             Func<double, double, double, double> innerIntegrand = Integrand(t, N, h, alpha);
             Func<double, double> steppedY = StepFunction.GetStepFunction(y, t / N);
             var first = 2 * eta * ThirdStep.C(h) * Enumerable.Range(1, N-1).AsParallel().Sum(k => Math.Pow(k * t / N, 0.5 - h) *

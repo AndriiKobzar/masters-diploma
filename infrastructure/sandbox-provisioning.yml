@@ -8,6 +8,31 @@
     image: ami-086b259f69f862b37
     region: us-east-1
   tasks:
+    - name: create key pair
+      tags: keypair
+      ec2_key:
+        region: "{{ region }}"
+        name: "{{ keyname }}"
+      register: mykey
+    - name: write the private key to file
+      copy: content="{{ mykey.key.private_key }}" dest="~/.ssh/{{ keyname }}.pem" mode=0600
+      when: mykey.changed
+    - name: create security group
+      tags: sg
+      ec2_group:
+        region: "{{ region }}"
+        #your security group name
+        name: "{{ my_securitygroup }}"
+        description: security group for webserver host
+        rules:
+          # allow ssh access from your ip address
+          - proto: tcp
+            from_port: 22
+            to_port: 22
+            cidr_ip: "{{ allowed_ip }}"
+        rules_egress:
+          - proto: all
+            cidr_ip: 0.0.0.0/0
     - name: Launch instance
       ec2:
          key_name: "{{ keypair }}"
