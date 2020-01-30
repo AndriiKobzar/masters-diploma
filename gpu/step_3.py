@@ -11,8 +11,9 @@ def c(h):
 
 
 def kernel(h):
-    return lambda s, t: c(h) * s ** (0.5 - h) * gauss_kronrod_integrate(lambda u: u**(h-0.5)*(u-s)**(h-1.5), s, t) \
-                        if s < t else 0
+    return lambda s, t: (
+        c(h) * (s ** (0.5 - h)) * gauss_kronrod_integrate(lambda u: (u**(h-0.5))*((u-s)**(h-1.5)), s, t) if s < t else 0
+    )
 
 
 def dvbyt(h, alpha):

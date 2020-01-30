@@ -1,5 +1,4 @@
 import utils
-import numpy as np
 from step_3 import dvbyt
 
 
@@ -9,7 +8,7 @@ def s_array(t, n, sigma, sigmaDerivative, y, alpha, h):
     def array_elem(k):
         return 2 * utils.gauss_kronrod_integrate(lambda x: integrand(k, x), 0, t)
 
-    return np.fromfunction(np.vectorize(array_elem), [n])
+    return list(map(array_elem, range(0, n)))
 
 
 def dvb_sigma_square_y(t, n, sigma, sigma_der, y, alpha, h):
