@@ -5,11 +5,15 @@ import step_4
 import step_5
 from standard_wiener import *
 import matplotlib.pyplot as plt
+from numba import cuda
 
 h = 0.6
 alpha = 0.6
 t = 1
 n = 2000
+
+points_count = 200
+calculations_per_point = 100
 
 
 def sigma(x): return np.sin(x) ** 2 + 0.05
@@ -41,6 +45,14 @@ def plot():
     plt.show()
 
 
-print(np.average([get_delta(0.1) for x in range(0, 100)]))
+@cuda.jit
+def kernel(i):
+    return 0
 
-#plot()
+
+# print(np.average([get_delta(0.1) for x in range(0, 100)]))
+
+# plot()
+
+def run_on_gpu():
+    return kernel[points_count, calculations_per_point]()

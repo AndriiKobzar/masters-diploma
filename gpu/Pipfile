@@ -9,6 +9,7 @@ verify_ssl = true
 scipy = "*"
 pygsl = "*"
 matplotlib = "*"
+numba = "*"
 
 [requires]
 python_version = "3.8"
