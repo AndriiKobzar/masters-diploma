@@ -8,16 +8,13 @@ namespace DiplomaProject.AlgorithmSteps
     public static class FifthSixthStep
     {
         public static double CoolDelta(double t, int N, double h, double[] sArray, double alpha, double[] y,
-            double[] sbmIncrements,
-            Func<double, double> sigma,
-            Func<double, double> sigmaDerivative,
-            Func<double, double> secondSigmaDerivative)
+            double[] sbmIncrements, FunctionWithDerivatives sigma)
         {
             double eta = 1 / sArray.Sum(x => x * x);
             Func<double, double, double, double> innerIntegrand = Integrand(t, N, h, alpha);
             Func<double, double> steppedY = StepFunction.GetStepFunction(y, t / N);
             var first = 2 * eta * ThirdStep.C(h) * Enumerable.Range(1, N-1).AsParallel().Sum(k => Math.Pow(k * t / N, 0.5 - h) *
-                            NonAdaptiveGaussKronrod.Integrate(s => sigma(steppedY(s)) * sigmaDerivative(steppedY(s)) *
+                            NonAdaptiveGaussKronrod.Integrate(s => sigma.Function(steppedY(s)) * sigma.FirstDerivative(steppedY(s)) *
                                                                    NonAdaptiveGaussKronrod.Integrate(v => innerIntegrand(s, v, k), k*t/N, s)
                                 , k*t/N, t) * sbmIncrements[k]);
             
@@ -30,8 +27,8 @@ namespace DiplomaProject.AlgorithmSteps
                 Func<double, double, double> dvbYt = ThirdStep.DvbYt(h, alpha);
                 return -4 * Math.Pow(eta, 2) * NonAdaptiveGaussKronrod.Integrate(
                            q => stepSArray(q) * NonAdaptiveGaussKronrod.Integrate(
-                                    tau => (Math.Pow(sigmaDerivative(steppedY(tau)), 2) +
-                                            sigma(steppedY(tau)) * secondSigmaDerivative(steppedY(tau))) *
+                                    tau => (Math.Pow(sigma.FirstDerivative(steppedY(tau)), 2) +
+                                            sigma.Function(steppedY(tau)) * sigma.SecondDerivative(steppedY(tau))) *
                                            dvbYt(v, tau) * dvbYt(q, tau), 0, t), 0, t);
             }
         }

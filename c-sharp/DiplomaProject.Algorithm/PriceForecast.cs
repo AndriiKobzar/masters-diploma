@@ -5,7 +5,7 @@ namespace DiplomaProject
 {
     public class PriceForecast
     {
-        static double Forecast(double[] historicData, double[] density, double t, double b, double n, Func<double, double> payoffFunction)
+        public static double Forecast(double[] historicData, double[] density, double t, double b, double n, Func<double, double> payoffFunction)
         {
             Func<double, double> stepDensity = StepFunction.GetStepFunction(density, t/n);
             return 2 * Math.Pow(Math.PI, -0.5)*t*NonAdaptiveGaussKronrod.Integrate(x => G(x) * 

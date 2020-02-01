@@ -6,10 +6,9 @@ namespace DiplomaProject.AlgorithmSteps
 {
   public static class FourthStep
   {
-    public static double[] S(double t, int N, Func<double, double> sigma, Func<double, double> sigmaDerivative,
-      double[] observations, double alpha, double h)
+    public static double[] S(double t, int N, FunctionWithDerivatives sigma, double[] observations, double alpha, double h)
     {
-      Func<double, double, double> integrand = DvbSigmaSquareY(t, N, sigma, sigmaDerivative, observations, alpha, h);
+      Func<double, double, double> integrand = DvbSigmaSquareY(t, N, sigma, observations, alpha, h);
       double GetElementOfResult(int k) =>
         2 * NonAdaptiveGaussKronrod.Integrate(x => integrand(k, x), 0,t);
 
@@ -20,14 +19,14 @@ namespace DiplomaProject.AlgorithmSteps
         .ToArray();
     }
 
-    public static Func<double, double, double> DvbSigmaSquareY(double t, int N, Func<double, double> sigma, Func<double, double> sigmaDerivative,
+    public static Func<double, double, double> DvbSigmaSquareY(double t, int N, FunctionWithDerivatives sigma,
       double[] observations, double alpha, double h)
     {
       Func<double, double> observationsStep = StepFunction.GetStepFunction(observations, t / N);
       return (k, s) =>
       {
         Func<double, double, double> dvbyt = ThirdStep.DvbYt(h, alpha);
-        return sigma(observationsStep(s)) * sigmaDerivative(observationsStep(s)) * dvbyt(k*t/N,s);
+        return sigma.Function(observationsStep(s)) * sigma.FirstDerivative(observationsStep(s)) * dvbyt(k*t/N,s);
       };
     }
   }

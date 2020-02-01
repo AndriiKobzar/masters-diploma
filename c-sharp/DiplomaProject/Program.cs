@@ -3,7 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using DiplomaProject.Algorithm.AlgorithmSteps;
 using DiplomaProject.AlgorithmSteps;
 
 namespace DiplomaProject
@@ -27,68 +29,33 @@ namespace DiplomaProject
             //double SigmaSecondDerivative(double y) => Math.Pow(y * y + 1, -0.5) - y * y * Math.Pow(y * y + 1, -1.5);
 
 
+            double PayoffFunction(double s) => Math.Max(s - 1, 0) + (s > 1 ? 1 : 0);
+
             var pointsCount = 50;
             var rangeStart = 0;
             var rangeEnd = 2;
             ConcurrentDictionary<double, double> resultSet = new ConcurrentDictionary<double, double>();
-            var fileName = string.Format("diploma-log-{0}.txt", DateTime.Now);
-            //using (var streamWriter = new StreamWriter(new FileStream(fileName, FileMode.OpenOrCreate)))
+            var sigma = new FunctionWithDerivatives
             {
-                //Parallel.For(1, pointsCount+1, (i) =>
-                //{
-                for (int i = 1; i <= pointsCount; i++)
-                {
-                    var random = new Random(DateTime.Now.Millisecond);
-                    double u = rangeStart + 1.0 * i * rangeEnd / pointsCount;
-                    double averageDelta = Enumerable.Range(1, 100)
-                      .AsParallel()
-                      .WithDegreeOfParallelism(100)
-                      .Select(calculationIndex =>
-                      {
-                          double[] observations;
-                          double[] fbmIncrements;
-                          double integral;
-
-                          //do
-                          //{
-                              Console.WriteLine("Calculating Y array {0} {1}", u, calculationIndex);
-                              fbmIncrements = EulerScheme.GetFractionalBrownianMotionIncrements(random, h, n, t);
-                              observations = EulerScheme.GetObservations(alpha, n, t, fbmIncrements).ToArray();
-                              integral = SecondStep.IntegralOfSquareSigma(t, Sigma, observations);
-                              Console.WriteLine("integral of sigma {0} {1} : {2}", u, calculationIndex, integral);
-                          //} while (integral > u);
-
-                          if (integral <= u)
-                          {
-                              Console.WriteLine("delta {0} {1} = {2}", u, calculationIndex, 0);
-                              return 0;
-                          }
-
-                          //Console.WriteLine("fbm increments");
-                          //Display.Array(fbmIncrements);
-
-                          //Console.WriteLine("Y array");
-                          //Display.Array(observations);
-
-                          Console.WriteLine("Calculating array S {0} {1}", u, calculationIndex);
-                          double[] s = FourthStep.S(t, n, Sigma, SigmaDerivative, observations, alpha, h);
-                          Console.WriteLine("Calculated array S {0} {1}", u, calculationIndex);
-                          //Display.Array(s);
-                          Console.WriteLine("Calculating delta {0} {1}", u, calculationIndex);
-                          double[] sbmIncrements = StandardWienerProcess.GetStandardWienerProcess(random, n, t / n);
-                          double delta = FifthSixthStep.CoolDelta(t, n, h, s, alpha, observations, sbmIncrements,
-                    Sigma,
-                    SigmaDerivative,
-                    SigmaSecondDerivative);
-                          Console.WriteLine("delta {0} {1} = {2}", u, calculationIndex, delta);
-                         // streamWriter.WriteLine("delta {0} {1} = {2}", u, calculationIndex, delta);
-                          return delta;
-                      }).Average();
-                    resultSet.TryAdd(u, averageDelta);
-                    Console.WriteLine(DateTime.Now);
-                }
+                Function = Sigma,
+                FirstDerivative = SigmaDerivative,
+                SecondDerivative = SigmaSecondDerivative
+            };
+            for (int i = 1; i <= pointsCount; i++)
+            {
+                var random = new Random(DateTime.Now.Millisecond);
+                double u = rangeStart + 1.0 * i * rangeEnd / pointsCount;
+                double averageDelta = Enumerable.Range(1, 100)
+                    .AsParallel()
+                    .WithDegreeOfParallelism(100)
+                    .Select(calculationIndex => Density.GetDensity(random, h, t, n, alpha, sigma, u))
+                    .Average();
+                resultSet.TryAdd(u, averageDelta);
                 Console.WriteLine(DateTime.Now);
             }
+
+            Console.WriteLine(DateTime.Now);
+
             //});
             //Console.ReadLine();
             //await new WolframClient().ExecuteRequest("D[sin[x]^2, {x, 2}]");
@@ -96,6 +63,12 @@ namespace DiplomaProject
             {
                 Console.WriteLine($"{pair.Key} {pair.Value}");
             }
+
+            var data = new double[] { };
+            var density = new double[] { };
+            var b = 0.5;
+            double prediction = PriceForecast.Forecast(data, density, t, b, n, PayoffFunction);
+            Console.WriteLine(prediction);
         }
     }
 }
