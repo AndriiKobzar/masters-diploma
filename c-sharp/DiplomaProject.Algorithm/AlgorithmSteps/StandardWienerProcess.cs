@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace DiplomaProject.AlgorithmSteps
+namespace DiplomaProject.Algorithm.AlgorithmSteps
 {
     public static class StandardWienerProcess
     {

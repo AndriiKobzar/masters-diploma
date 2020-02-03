@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiplomaProject", "DiplomaPr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiplomaProject.Algorithm", "DiplomaProject.Algorithm\DiplomaProject.Algorithm.csproj", "{C72B01ED-D0FC-455C-9FC3-12DE94BE7CDB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiplomaProject.Forecast", "DiplomaProject.Forecast\DiplomaProject.Forecast.csproj", "{B0A282CE-6A14-4F60-A454-DCB8EE1AA681}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C72B01ED-D0FC-455C-9FC3-12DE94BE7CDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C72B01ED-D0FC-455C-9FC3-12DE94BE7CDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C72B01ED-D0FC-455C-9FC3-12DE94BE7CDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0A282CE-6A14-4F60-A454-DCB8EE1AA681}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0A282CE-6A14-4F60-A454-DCB8EE1AA681}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0A282CE-6A14-4F60-A454-DCB8EE1AA681}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0A282CE-6A14-4F60-A454-DCB8EE1AA681}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

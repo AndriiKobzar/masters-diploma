@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Accord.Math.Integration;
 
-namespace DiplomaProject.AlgorithmSteps
+namespace DiplomaProject.Algorithm.AlgorithmSteps
 {
   public static class FourthStep
   {

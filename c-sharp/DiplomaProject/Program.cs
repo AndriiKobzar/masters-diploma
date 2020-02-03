@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
+using DiplomaProject.Algorithm;
 using DiplomaProject.Algorithm.AlgorithmSteps;
-using DiplomaProject.AlgorithmSteps;
 
 namespace DiplomaProject
 {
@@ -55,20 +52,11 @@ namespace DiplomaProject
             }
 
             Console.WriteLine(DateTime.Now);
-
-            //});
-            //Console.ReadLine();
-            //await new WolframClient().ExecuteRequest("D[sin[x]^2, {x, 2}]");
+            
             foreach (KeyValuePair<double, double> pair in resultSet)
             {
                 Console.WriteLine($"{pair.Key} {pair.Value}");
             }
-
-            var data = new double[] { };
-            var density = new double[] { };
-            var b = 0.5;
-            double prediction = PriceForecast.Forecast(data, density, t, b, n, PayoffFunction);
-            Console.WriteLine(prediction);
         }
     }
 }

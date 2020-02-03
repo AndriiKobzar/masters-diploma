@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DiplomaProject
+namespace DiplomaProject.Algorithm.AlgorithmSteps
 {
   public static class EnumerableHelper
   {

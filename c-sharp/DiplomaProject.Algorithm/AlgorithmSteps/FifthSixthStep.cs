@@ -1,9 +1,8 @@
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 using Accord.Math.Integration;
 
-namespace DiplomaProject.AlgorithmSteps
+namespace DiplomaProject.Algorithm.AlgorithmSteps
 {
     public static class FifthSixthStep
     {

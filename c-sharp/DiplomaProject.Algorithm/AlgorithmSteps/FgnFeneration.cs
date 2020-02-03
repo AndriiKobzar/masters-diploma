@@ -3,7 +3,7 @@ using System.Linq;
 using System.Numerics;
 using Accord.Math;
 
-namespace DiplomaProject.AlgorithmSteps
+namespace DiplomaProject.Algorithm.AlgorithmSteps
 {
   public class FgnFeneration
   {

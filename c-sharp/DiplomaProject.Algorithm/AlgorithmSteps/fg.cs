@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 
-namespace DiplomaProject.AlgorithmSteps
+namespace DiplomaProject.Algorithm.AlgorithmSteps
 {
   public class fG
   {

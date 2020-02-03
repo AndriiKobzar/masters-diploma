@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using DiplomaProject.AlgorithmSteps;
 
 namespace DiplomaProject.Algorithm.AlgorithmSteps
 {

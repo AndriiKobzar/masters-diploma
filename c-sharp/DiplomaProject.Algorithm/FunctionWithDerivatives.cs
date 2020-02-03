@@ -1,6 +1,6 @@
 using System;
 
-namespace DiplomaProject
+namespace DiplomaProject.Algorithm
 {
     public class FunctionWithDerivatives
     {
