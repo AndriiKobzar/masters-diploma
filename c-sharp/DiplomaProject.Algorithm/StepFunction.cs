@@ -19,7 +19,7 @@ namespace DiplomaProject.Algorithm
             {
                 (double _, Point point) = points
                     .Select(p => (p.X - x, p))
-                    .Where(tuple => tuple.Item1 < 0)
+                    .Where(tuple => tuple.Item1 <= 0)
                     .OrderBy(tuple => tuple.Item1)
                     .LastOrDefault();
                 return point.Y;

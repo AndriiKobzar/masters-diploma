@@ -1,23 +1,31 @@
 using System;
 using System.Linq;
 using Accord.Math.Integration;
+using DiplomaProject.Algorithm.AlgorithmSteps;
 
 namespace DiplomaProject.Algorithm
 {
     public class PriceForecast
     {
-        public static double Forecast(double firstHistoricValue, Point[] density, double b, Func<double, double> payoffFunction, double t)
+        public static double Forecast(double firstHistoricValue, Point[] density, double b,
+            Func<double, double> payoffFunction, double t)
         {
-            var maxDensity = density.Select(p => p.X).Max();
+            double minDensity = density.Select(p => p.X).Min();
+            double maxDensity = density.Select(p => p.X).Max();
             Func<double, double> stepDensity = StepFunction.GetStepFunction(density);
-            return 2 * Math.Pow(Math.PI, -0.5)*t*NonAdaptiveGaussKronrod.Integrate(x => G(x) * 
-                       NonAdaptiveGaussKronrod.Integrate(u => (x+u/2-firstHistoricValue - b*t)/Math.Pow(u,3) *
-                                                              Math.Pow(Math.Exp(-(x+u/2-firstHistoricValue - b*t)),2)/(2*Math.Pow(u,2))*stepDensity(u), 0,maxDensity), 0, t);
+            return Math.Pow(2 * Math.PI, -0.5) * t *
+                   IntegrationWrapper.Integrate(x => G(x) * IntegrationWrapper.Integrate(u =>
+                                                                  (x + u / 2 - firstHistoricValue - b * t) /
+                                                                  Math.Pow(u, 3) *
+                                                                  Math.Exp(
+                                                                      -Math.Pow(x + u / 2 - firstHistoricValue - b * t,
+                                                                          2) / (2 * Math.Pow(u, 2))) * Math.Abs(stepDensity(u)),
+                                                              minDensity, maxDensity, "forecast integral density"), -t, t, "forecast integral dx");
 
 
             double G(double x)
             {
-                return NonAdaptiveGaussKronrod.Integrate(z => payoffFunction(Math.Exp(z)), 0, x);
+                return IntegrationWrapper.Integrate(z => payoffFunction(Math.Exp(z)), 0, x, "integral G(x)");
             }
         }
     }

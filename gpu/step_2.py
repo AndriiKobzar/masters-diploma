@@ -1,3 +1,5 @@
 def integral_of_square_sigma(t, sigma, observations):
-  delta = t/len(observations)
-  return sum(map(lambda x: delta*sigma(x)**2, observations))
+    result = 0
+    for y in observations:
+        result += sigma(y) ** 2
+    return result

@@ -63,7 +63,7 @@
   become: True
   gather_facts: True
   roles:
-    - my_awesome_role
+    - suzuki-shunsuke.pyenv
     - my_awesome_test
 
 - name: Terminate instances

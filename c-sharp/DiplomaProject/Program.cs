@@ -24,10 +24,7 @@ namespace DiplomaProject
             //double Sigma(double y) => Math.Sqrt(y * y + 1);
             //double SigmaDerivative(double y) => y * Math.Pow(y * y + 1, -0.5);
             //double SigmaSecondDerivative(double y) => Math.Pow(y * y + 1, -0.5) - y * y * Math.Pow(y * y + 1, -1.5);
-
-
-            double PayoffFunction(double s) => Math.Max(s - 1, 0) + (s > 1 ? 1 : 0);
-
+            
             var pointsCount = 50;
             var rangeStart = 0;
             var rangeEnd = 2;
@@ -38,19 +35,20 @@ namespace DiplomaProject
                 FirstDerivative = SigmaDerivative,
                 SecondDerivative = SigmaSecondDerivative
             };
-            for (int i = 1; i <= pointsCount; i++)
-            {
-                var random = new Random(DateTime.Now.Millisecond);
-                double u = rangeStart + 1.0 * i * rangeEnd / pointsCount;
-                double averageDelta = Enumerable.Range(1, 100)
-                    .AsParallel()
-                    .WithDegreeOfParallelism(100)
-                    .Select(calculationIndex => Density.GetDensity(random, h, t, n, alpha, sigma, u))
-                    .Average();
-                resultSet.TryAdd(u, averageDelta);
-                Console.WriteLine(DateTime.Now);
-            }
-
+            var random = new Random(DateTime.Now.Millisecond);
+            // for (int i = 1; i <= pointsCount; i++)
+            // {
+            //     var random = new Random(DateTime.Now.Millisecond);
+            //     double u = rangeStart + 1.0 * i * rangeEnd / pointsCount;
+            //     double averageDelta = Enumerable.Range(1, 100)
+            //         .AsParallel()
+            //         .WithDegreeOfParallelism(100)
+            //         .Select(calculationIndex => Density.GetDensity(random, h, t, n, alpha, sigma, u))
+            //         .Average();
+            //     resultSet.TryAdd(u, averageDelta);
+            //     Console.WriteLine(DateTime.Now);
+            // }
+            Density.GetDensity(random, h, t, n, alpha, sigma, 0.04);
             Console.WriteLine(DateTime.Now);
             
             foreach (KeyValuePair<double, double> pair in resultSet)

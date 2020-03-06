@@ -7,14 +7,19 @@ namespace DiplomaProject.Forecast
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] _)
         {
             Point[] density = GetDensityData("density.txt");
-            const int x0 = 0;
-            const double b = 0.2;
+            double x0 = 0;
+            Console.WriteLine(0);
+            const double b = 0.4;
+            const double t = 1;
             static double PayoffFunction(double s) => Math.Max(s - 1, 0) + (s > 1 ? 1 : 0);
-            double forecast = PriceForecast.Forecast(x0,density,b,PayoffFunction,1);
-            Console.WriteLine(forecast);
+            for (int i = 0; i < 100; i++)
+            {
+                x0 = PriceForecast.Forecast(x0, density, b, PayoffFunction, t);
+                Console.WriteLine(x0);
+            }
         }
 
         static Point[] GetDensityData(string fileName)
