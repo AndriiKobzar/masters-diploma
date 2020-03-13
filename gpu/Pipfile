@@ -8,7 +8,7 @@ verify_ssl = true
 [packages]
 scipy = "==1.3.3"
 matplotlib = "*"
-numba = "*"
+numba = "==0.48.0"
 numba-scipy = "*"
 
 [requires]

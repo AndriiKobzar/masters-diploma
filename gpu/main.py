@@ -11,21 +11,22 @@ points_count = 200
 calculations_per_point = 100
 
 
-@jit(nopython=True, cache=True)
+@njit(cache=True)
 def sigma(x): return np.sin(x) ** 2 + 0.05
 
 
-@jit(nopython=True, cache=True)
+@njit(cache=True)
 def sigmaDerivative(x): return np.sin(2 * x)
 
 
-@jit(nopython=True, cache=True)
+@njit(cache=True)
 def secondSigmaDerivative(x): return 2 * np.cos(2 * x)
 
 
 @cuda.jit
-def kernel(i):
-    u = int(i / points_count)
+def kernel():
+    ty = cuda.blockIdx.x
+    u = int(ty / points_count)
     return get_delta(t, n, h, alpha, sigma, sigmaDerivative, secondSigmaDerivative, u)
 
 
@@ -34,3 +35,6 @@ print(np.average([get_delta(t, n, h, alpha, sigma, sigmaDerivative, secondSigmaD
 
 def run_on_gpu():
     return kernel[points_count, calculations_per_point]()
+
+
+#print(run_on_gpu())
