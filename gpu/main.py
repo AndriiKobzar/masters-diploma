@@ -30,11 +30,11 @@ def kernel():
     return get_delta(t, n, h, alpha, sigma, sigmaDerivative, secondSigmaDerivative, u)
 
 
-print(np.average([get_delta(t, n, h, alpha, sigma, sigmaDerivative, secondSigmaDerivative, 0.1) for x in range(0, 1)]))
+#print(np.average([get_delta(t, n, h, alpha, sigma, sigmaDerivative, secondSigmaDerivative, 0.1) for x in range(0, 1)]))
 
 
 def run_on_gpu():
     return kernel[points_count, calculations_per_point]()
 
 
-#print(run_on_gpu())
+print(run_on_gpu())
