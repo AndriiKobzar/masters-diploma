@@ -1,0 +1,8 @@
+- name : fetch source code
+  git: 
+    clone: yes
+    repo: {{ REPO }}
+    dest: {{ WORK_DIR }}
+
+- name : install dependencies
+  
