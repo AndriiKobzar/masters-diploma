@@ -167,7 +167,7 @@ double density_inner_integrand(double v, void *p) {
 double density_outer_integrand(double s, void *p) {
     struct outer_density_integrand_params *params = (struct outer_density_integrand_params *) p;
     double step_x = step(params->y, params->n, params->t / params->n, s);
-    gsl_integration_cquad_workspace *w = gsl_integration_cquad_workspace_alloc(WORKSPACE_SIZE);
+
     double integrationResult;
     gsl_function integrand;
     integrand.function = &density_inner_integrand;
@@ -178,6 +178,7 @@ double density_outer_integrand(double s, void *p) {
     if (abs(tau - s) < 0.000001) {
         return 0;
     }
+    gsl_integration_cquad_workspace *w = gsl_integration_cquad_workspace_alloc(WORKSPACE_SIZE);
     gsl_integration_cquad(&integrand, params->k * params->t / params->n, s, ABS_ERR, REL_ERR, w, &integrationResult,
                           nullptr, nullptr);
     gsl_integration_cquad_workspace_free(w);
@@ -276,7 +277,7 @@ int main() {
     double alpha = 0.6;
 
     const long double sysTime = time(nullptr);
-    const unsigned long sysTimeMS = (unsigned long)sysTime*1000;
+    const unsigned long sysTimeMS = (unsigned long)sysTime;
     gsl_rng *r = gsl_rng_alloc(gsl_rng_taus);
     gsl_rng_set(r, sysTimeMS);
 //#pragma omp for
