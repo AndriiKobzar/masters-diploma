@@ -6,15 +6,16 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_specfunc.h>
 #include "integrand_params.h"
-//#include <omp.h>
+#include <omp.h>
 #include "ctime"
 
 #define REAL(z, i) ((z)[2*(i)])
 #define IMAG(z, i) ((z)[2*(i)+1])
 #define ABS_ERR 0
 #define REL_ERR 0.001
-#define WORKSPACE_SIZE 1000
+#define WORKSPACE_SIZE 20
 #define EPSILON 0.000001
+#define NUM_THREADS 4
 
 using namespace std;
 
@@ -210,7 +211,9 @@ double dvbeta_outer_integrand(double tau, void *p) {
     gsl_function integrand;
     integrand.function = &dvbeta_inner_integrand;
     integrand.params = params;
-    gsl_integration_qng(&integrand, 0.001, params->t, ABS_ERR, REL_ERR, &result, nullptr, nullptr);
+    double err;
+    size_t neval;
+    gsl_integration_qng(&integrand, 0.001, params->t, ABS_ERR, REL_ERR, &result, &err, &neval);
     //gsl_integration_cquad_workspace_free(w);
     return result;
 }
@@ -223,7 +226,9 @@ double dvbeta(double v, sndsn_integrand_params *params) {
     gsl_function integrand;
     integrand.function = &dvbeta_outer_integrand;
     integrand.params = params;
-    gsl_integration_qng(&integrand, 0.001, params->t, ABS_ERR, REL_ERR, &result, nullptr, nullptr);
+    double err;
+    size_t neval;
+    gsl_integration_qng(&integrand, 0.001, params->t, ABS_ERR, REL_ERR, &result, &err, &neval);
     //gsl_integration_cquad_workspace_free(w);
     return result;
 }
@@ -264,7 +269,9 @@ double density(double *y, double *s, double *sbm_incr, int n, double t, double h
     params.y = y;
     params.eta = eta;
     integrand.params = &params;
-    gsl_integration_qng(&integrand, 0.001, t, 2, 2, &sndsn, nullptr, nullptr);
+    double err;
+    size_t neval;
+    gsl_integration_qng(&integrand, 0.001, t, 2, 2, &sndsn, &err, &neval);
     gsl_integration_cquad_workspace_free(w);
     return first - sndsn;
 }
@@ -278,7 +285,7 @@ double *sbm_increments(gsl_rng *r, double d, int n) {
 }
 
 int main() {
-    //gsl_set_error_handler_off();
+    gsl_set_error_handler_off();
     double h = 0.6;
     int n = 33;
     double t = 1.;
@@ -288,8 +295,9 @@ int main() {
     const unsigned long sysTimeMS = (unsigned long) sysTime;
     gsl_rng *r = gsl_rng_alloc(gsl_rng_taus);
     gsl_rng_set(r, sysTimeMS);
-//#pragma omp for
-    for (int i = 0; i < 2; i++) {
+    omp_set_num_threads(NUM_THREADS);
+#pragma omp for
+    for (int i = 0; i < 8; i++) {
         double u = i * 2. / 50;
         double *lambda = get_lambda(h, n);
         double *fbm = get_fgn(r, lambda, 2 * n - 2, t, h);
