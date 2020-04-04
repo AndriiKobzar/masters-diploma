@@ -37,7 +37,7 @@ double *get_lambda(double h, int n) {
         REAL(c, i) = fbc(g, i);
         IMAG(c, i) = 0;
     }
-    for (int i = 0; i < n; ++i) {
+    for (int i = 1; i < n; ++i) {
         REAL(c, m - i) = REAL(c, i);
         IMAG(c, m - i) = 0;
     }
