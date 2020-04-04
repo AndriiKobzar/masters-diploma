@@ -18,43 +18,50 @@
 
 using namespace std;
 
+double get_random(gsl_rng *r, double sigma) {
+    double generatedValue = gsl_ran_gaussian(r, sigma);
+    unsigned long min = gsl_rng_min(r);
+    unsigned long max = gsl_rng_max(r);
+    return (generatedValue);
+}
+
 double fbc(double g, int x) {
     return (pow((x + 1), g) + pow(abs(x - 1), g) - 2 * pow(x, g)) / 2;
 }
 
 double *get_lambda(double h, int n) {
     int m = 2 * n - 2;
-    double *c;
-    c = new double[2 * m];
+    double *c = new double[2 * m];
     double g = 2 * h;
     for (int i = 0; i < n; ++i) {
         REAL(c, i) = fbc(g, i);
         IMAG(c, i) = 0;
     }
-    for (int i = 1; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         REAL(c, m - i) = REAL(c, i);
         IMAG(c, m - i) = 0;
     }
 
-    gsl_fft_complex_radix2_forward(c, 1, 2 * m);
+    gsl_fft_complex_radix2_forward(c, 1, m);
     auto result = new double[m];
     for (int i = 0; i < m; ++i) {
         result[i] = sqrt(REAL(c, i));
     }
+    delete[] c;
     return result;
 }
 
 double *get_fgn(gsl_rng *r, double *lambda, int lambda_len, double t, double h) {
     auto random = new double[2 * lambda_len];
     for (int i = 0; i < lambda_len; ++i) {
-        REAL(random, i) = gsl_ran_gaussian(r, 1);
+        REAL(random, i) = get_random(r, 1);
         IMAG(random, i) = 0;
     }
-    gsl_fft_complex_radix2_inverse(random, 1, 2 * lambda_len);
+    gsl_fft_complex_radix2_inverse(random, 1, lambda_len);
     for (int i = 0; i < lambda_len; ++i) {
         REAL(random, i) = REAL(random, i) * lambda[i];
     }
-    gsl_fft_complex_radix2_forward(random, 1, 2 * lambda_len);
+    gsl_fft_complex_radix2_forward(random, 1, lambda_len);
     auto result = new double[lambda_len];
     for (int i = 0; i < lambda_len / 2; ++i) {
         result[i] = REAL(random, i) * pow(t / lambda_len, h);
@@ -76,7 +83,7 @@ double sigma_second_der(double x) {
 
 double step(double *array, int length, double interval, double x) {
     int index = (int) floor(x / interval);
-    if (index > length) {
+    if (index >= length) {
         return array[length - 1];
     }
     return array[index];
@@ -166,18 +173,18 @@ double density_inner_integrand(double v, void *p) {
 
 double density_outer_integrand(double s, void *p) {
     struct outer_density_integrand_params *params = (struct outer_density_integrand_params *) p;
+    double tau = params->k * params->t / params->n;
+    if (abs(tau - s) < 0.000001) {
+        return 0;
+    }
     double step_x = step(params->y, params->n, params->t / params->n, s);
-
     double integrationResult;
     gsl_function integrand;
     integrand.function = &density_inner_integrand;
     inner_density_integrand_params innerDensityIntegrandParams = {params->n, params->t, params->alpha, params->h,
                                                                   params->k, s};
     integrand.params = &innerDensityIntegrandParams;
-    double tau = params->k * params->t / params->n;
-    if (abs(tau - s) < 0.000001) {
-        return 0;
-    }
+
     gsl_integration_cquad_workspace *w = gsl_integration_cquad_workspace_alloc(WORKSPACE_SIZE);
     gsl_integration_cquad(&integrand, params->k * params->t / params->n, s, ABS_ERR, REL_ERR, w, &integrationResult,
                           nullptr, nullptr);
@@ -198,32 +205,32 @@ double dvbeta_outer_integrand(double tau, void *p) {
     printf("%f\n", tau);
     struct sndsn_integrand_params *params = (struct sndsn_integrand_params *) p;
     params->tau = tau;
-    gsl_integration_cquad_workspace *w = gsl_integration_cquad_workspace_alloc(WORKSPACE_SIZE);
+    //gsl_integration_cquad_workspace *w = gsl_integration_cquad_workspace_alloc(WORKSPACE_SIZE);
     double result;
     gsl_function integrand;
     integrand.function = &dvbeta_inner_integrand;
     integrand.params = params;
-    gsl_integration_cquad(&integrand, 0.001, params->t, ABS_ERR, REL_ERR, w, &result, nullptr, nullptr);
-    gsl_integration_cquad_workspace_free(w);
+    gsl_integration_qng(&integrand, 0.001, params->t, ABS_ERR, REL_ERR, &result, nullptr, nullptr);
+    //gsl_integration_cquad_workspace_free(w);
     return result;
 }
 
 
 double dvbeta(double v, sndsn_integrand_params *params) {
     params->v = v;
-    gsl_integration_cquad_workspace *w = gsl_integration_cquad_workspace_alloc(WORKSPACE_SIZE);
+    //gsl_integration_cquad_workspace *w = gsl_integration_cquad_workspace_alloc(WORKSPACE_SIZE);
     double result;
     gsl_function integrand;
     integrand.function = &dvbeta_outer_integrand;
     integrand.params = params;
-    gsl_integration_cquad(&integrand, 0.001, params->t, ABS_ERR, REL_ERR, w, &result, nullptr, nullptr);
-    gsl_integration_cquad_workspace_free(w);
+    gsl_integration_qng(&integrand, 0.001, params->t, ABS_ERR, REL_ERR, &result, nullptr, nullptr);
+    //gsl_integration_cquad_workspace_free(w);
     return result;
 }
 
 double sndsn_integrand(double tau, void *p) {
     struct sndsn_integrand_params *params = (struct sndsn_integrand_params *) p;
-    return step(params->s, params->n, params->t/params->n, tau)* dvbeta(tau, params);
+    return step(params->s, params->n, params->t / params->n, tau) * dvbeta(tau, params);
 }
 
 double density(double *y, double *s, double *sbm_incr, int n, double t, double h, double alpha) {
@@ -235,7 +242,7 @@ double density(double *y, double *s, double *sbm_incr, int n, double t, double h
     double first = 0;
     gsl_integration_cquad_workspace *w = gsl_integration_cquad_workspace_alloc(WORKSPACE_SIZE);
     for (int k = 1; k < n; ++k) {
-        printf("first[%i]\n",k);
+        printf("first[%i]\n", k);
         double integrationResult;
         gsl_function integrand;
         integrand.function = &density_outer_integrand;
@@ -255,8 +262,9 @@ double density(double *y, double *s, double *sbm_incr, int n, double t, double h
     params.h = h;
     params.s = s;
     params.y = y;
+    params.eta = eta;
     integrand.params = &params;
-    gsl_integration_cquad(&integrand, 0.001, t, 2, 2, w, &sndsn, nullptr, nullptr);
+    gsl_integration_qng(&integrand, 0.001, t, 2, 2, &sndsn, nullptr, nullptr);
     gsl_integration_cquad_workspace_free(w);
     return first - sndsn;
 }
@@ -264,26 +272,27 @@ double density(double *y, double *s, double *sbm_incr, int n, double t, double h
 double *sbm_increments(gsl_rng *r, double d, int n) {
     double *result = new double[n];
     for (int i = 0; i < n; ++i) {
-        result[i] = gsl_ran_gaussian(r, d);
+        result[i] = get_random(r, d);
     }
     return result;
 }
 
 int main() {
-    gsl_set_error_handler_off();
+    //gsl_set_error_handler_off();
     double h = 0.6;
     int n = 33;
     double t = 1.;
     double alpha = 0.6;
 
     const long double sysTime = time(nullptr);
-    const unsigned long sysTimeMS = (unsigned long)sysTime;
+    const unsigned long sysTimeMS = (unsigned long) sysTime;
     gsl_rng *r = gsl_rng_alloc(gsl_rng_taus);
     gsl_rng_set(r, sysTimeMS);
 //#pragma omp for
-    for(int i=0;  i < 2; i ++) {
+    for (int i = 0; i < 2; i++) {
         double u = i * 2. / 50;
-        double *fbm = get_fgn(r, get_lambda(h, n), 2 * n - 2, t, h);
+        double *lambda = get_lambda(h, n);
+        double *fbm = get_fgn(r, lambda, 2 * n - 2, t, h);
         double *y = get_euler_trajectory(fbm, n, t, alpha);
         double integral = integral_of_sigma_square(y, n);
         if (integral <= u) {
@@ -295,7 +304,11 @@ int main() {
         double *sbm_incr = sbm_increments(r, t / n, n);
         double densityValue = density(y, s, sbm_incr, n, t, h, alpha);
         printf("density(%f)=%f", u, densityValue);
-
+        delete[] lambda;
+        delete[] fbm;
+        delete[] y;
+        delete[] s;
+        delete[] sbm_incr;
     }
     gsl_rng_free(r);
     return 0;
