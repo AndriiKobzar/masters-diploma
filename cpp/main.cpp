@@ -212,7 +212,6 @@ double dvbeta_inner_integrand(double q, void *p) {
 }
 
 double dvbeta_outer_integrand(double tau, void *p) {
-    printf("%f\n", tau);
     struct sndsn_integrand_params *params = (struct sndsn_integrand_params *)p;
     params->tau = tau;
     // gsl_integration_cquad_workspace *w =
@@ -320,8 +319,8 @@ int main(int argc, char *argv[]) {
     double alpha = 0.6;
     double globalStart = 0;
     double globalEnd = 2;
-    int numberOfPoints = 50;
-    const int calculationsPerPoint = 100;
+    int numberOfPoints = 20;
+    const int calculationsPerPoint = 1;
     int errCode;
 
     if ((errCode = MPI_Init(&argc, &argv)) != 0) {
@@ -333,7 +332,7 @@ int main(int argc, char *argv[]) {
 
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
     MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
-
+    printf("world size: %i\n", worldSize);
     if (myRank == root) {
         printf("MAIN PROCESS\n");
     }
@@ -360,14 +359,15 @@ int main(int argc, char *argv[]) {
     }
 
     const long double sysTime = time(nullptr);
-    const unsigned long sysTimeMS = (unsigned long)sysTime;
+    const unsigned long seed = (unsigned long)sysTime + myRank*1000;
     gsl_rng *r = gsl_rng_alloc(gsl_rng_taus);
-    gsl_rng_set(r, sysTimeMS);
+    gsl_rng_set(r, seed);
     omp_set_num_threads(NUM_THREADS);
     double* result = new double[rangeEnd - rangeStart + 1];
     for (int i = rangeStart; i < rangeEnd; i++) {
-        double u = globalStart + i * (globalStart - globalEnd) / numberOfPoints;
+        double u = globalStart + i * (globalEnd - globalStart) / numberOfPoints;
         double average = 0;
+	printf("rank %i point %i\n", myRank, i);
 #pragma omp parallel for shared(h, n, t, alpha, u, r)
         for (int j = 0; j < calculationsPerPoint; j++) {
             double *lambda = get_lambda(h, n);
@@ -375,7 +375,7 @@ int main(int argc, char *argv[]) {
             double *y = get_euler_trajectory(fbm, n, t, alpha);
             double integral = integral_of_sigma_square(y, n);
             if (integral <= u) {
-                printf("density(%f)=%f", u, .0);
+                printf("density(%f)=%f\n", u, .0);
                 continue;
             }
 
