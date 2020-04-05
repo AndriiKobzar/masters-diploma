@@ -389,9 +389,7 @@ int main(int argc, char *argv[]) {
             delete[] s;
             delete[] sbm_incr;
             #pragma omp atomic
-            {
-                average += densityValue / numberOfPoints;
-            }
+            average += densityValue / numberOfPoints;
         }
         result[i] = average;
     }
