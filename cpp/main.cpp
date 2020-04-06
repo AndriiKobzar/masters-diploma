@@ -342,7 +342,6 @@ int main(int argc, char *argv[]) {
     int remainder = numberOfPoints % worldSize;
     int rangeStart = 0;
     int rangeEnd = 0;
-    int recvSize = 0;
     if (remainder > 0) {
         if (myRank <= remainder) {
             rangeStart = (myRank * (quotient + 1));
@@ -351,11 +350,9 @@ int main(int argc, char *argv[]) {
             rangeStart = myRank * quotient + remainder;
             rangeEnd = rangeStart + quotient;
         }
-        recvSize = (quotient+1)*worldSize;
     } else {
         rangeStart = myRank * quotient;
         rangeEnd = (myRank + 1) * quotient - 1;
-        recvSize = quotient*worldSize;
     }
 
     const long double sysTime = time(nullptr);
@@ -394,8 +391,31 @@ int main(int argc, char *argv[]) {
         result[i] = average;
     }
     gsl_rng_free(r);
-    double* recv = new double[recvSize];
-    MPI_Gather(result, rangeEnd - rangeStart + 1, MPI_DOUBLE, recv, recvSize, MPI_DOUBLE, root, MPI_COMM_WORLD);
+    int* displacements;
+    double* recv;
+    int* recvCounts;
+    if(myRank == 0) {
+        recv = new double[numberOfPoints];
+        recvCounts = new int[worldSize];
+        displacements = new int[worldSize];
+        for (int i = 0; i < worldSize; i++)
+        {
+            if(i==0){
+                displacements[i] = 0;
+            } else {
+                displacements[i] = displacements[i-1] + quotient;
+            }
+            recvCounts[i] = quotient;
+            if(i<remainder) {
+                displacements[i]++;
+                recvCounts[i]++;
+            } else if(i==remainder) {
+                displacements[i++];
+            }
+        }
+        
+    }
+    MPI_Gatherv(result, rangeEnd - rangeStart + 1, MPI_DOUBLE, recv, recvCounts, displacements, MPI_DOUBLE, root, MPI_COMM_WORLD);
     if(myRank == root) {
         for (int i = 0; i < numberOfPoints; i++)
         {
