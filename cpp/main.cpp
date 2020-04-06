@@ -361,7 +361,7 @@ int main(int argc, char *argv[]) {
     gsl_rng_set(r, seed);
     omp_set_num_threads(NUM_THREADS);
     double* result = new double[rangeEnd - rangeStart + 1];
-    for (int i = rangeStart; i < rangeEnd; i++) {
+    for (int i = 0; i <= rangeEnd-rangeStart; i++) {
         double u = globalStart + i * (globalEnd - globalStart) / numberOfPoints;
         double average = 0;
 	printf("rank %i point %i\n", myRank, i);
