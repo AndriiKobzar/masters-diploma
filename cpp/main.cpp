@@ -402,8 +402,8 @@ int main(int argc, char *argv[]) {
         {
             if(i==0){
                 displacements[i] = 0;
-		recvCounts[i] = quotient + (remainder>0 ? 1 : 0);
-		continue;
+                recvCounts[i] = quotient + (remainder>0 ? 1 : 0);
+                continue;
             } else {
                 displacements[i] = displacements[i-1] + quotient;
             }
