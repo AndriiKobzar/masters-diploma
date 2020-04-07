@@ -16,7 +16,7 @@
 #define REL_ERR 0.001
 #define WORKSPACE_SIZE 20
 #define EPSILON 0.000001
-#define NUM_THREADS 4
+#define NUM_THREADS 8
 
 using namespace std;
 
@@ -162,7 +162,7 @@ double *s_array(double *y, int n, double t, double alpha, double h) {
         gsl_integration_cquad(&F, 0.001, t, 0, 0.001, w, &localResult, nullptr,
                               nullptr);
         result[i] = 2 * localResult;
-        printf("s[%i] = %f\n", i, result[i]);
+        //printf("s[%i] = %f\n", i, result[i]);
     }
     gsl_integration_cquad_workspace_free(w);
     return result;
@@ -261,7 +261,7 @@ double density(double *y, double *s, double *sbm_incr, int n, double t,
     gsl_integration_cquad_workspace *w =
         gsl_integration_cquad_workspace_alloc(WORKSPACE_SIZE);
     for (int k = 1; k < n; ++k) {
-        printf("first[%i]\n", k);
+        //printf("first[%i]\n", k);
         double integrationResult;
         gsl_function integrand;
         integrand.function = &density_outer_integrand;
@@ -320,7 +320,7 @@ int main(int argc, char *argv[]) {
     double globalStart = 0;
     double globalEnd = 2;
     int numberOfPoints = 20;
-    const int calculationsPerPoint = 1;
+    const int calculationsPerPoint = 100;
     int errCode;
 
     if ((errCode = MPI_Init(&argc, &argv)) != 0) {
@@ -402,6 +402,8 @@ int main(int argc, char *argv[]) {
         {
             if(i==0){
                 displacements[i] = 0;
+		recvCounts[i] = quotient + (remainder>0 ? 1 : 0);
+		continue;
             } else {
                 displacements[i] = displacements[i-1] + quotient;
             }
@@ -410,7 +412,7 @@ int main(int argc, char *argv[]) {
                 displacements[i]++;
                 recvCounts[i]++;
             } else if(i==remainder) {
-                displacements[i++];
+                displacements[i]++;
             }
         }
         
@@ -419,7 +421,7 @@ int main(int argc, char *argv[]) {
     if(myRank == root) {
         for (int i = 0; i < numberOfPoints; i++)
         {
-            printf("%f", recv[i]);
+            printf("delta[%i]=%f",i, recv[i]);
         }
     }
     MPI_Finalize();
