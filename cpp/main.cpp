@@ -109,7 +109,7 @@ double *get_euler_trajectory(double *fbm, int length, double t, double alpha) {
 
 double c(double h) {
     double dividend = 2 * h * gsl_sf_gamma(1.5 - h);
-    double divisor = gsl_sf_gamma(h + 0.5) * gsl_sf_gamma(2 - 2 / h);
+    double divisor = gsl_sf_gamma(h + 0.5) * gsl_sf_gamma(2 - 2 * h);
     return (h - 0.5) * sqrt(dividend / divisor);
 }
 
